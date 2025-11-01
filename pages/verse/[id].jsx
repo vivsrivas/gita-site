@@ -32,17 +32,35 @@ export async function getStaticProps({ params }) {
 
   const resChapters = await fetch(`${base}/chapters.json`);
   const chapters = await resChapters.json();
+  // 🔹 Attempt to load multiple commentaries
+  const commentaryAuthors = ["shankara", "ramanuja", "madhva", "jayateertha", "raghevendra"]; // add more later if needed
+  const commentaries = [];
+
+  for (const author of commentaryAuthors) {
+    try {
+      const res = await fetch(`${base}/commentaries/${author}/${id}.json`);
+      if (res.ok) {
+        const data = await res.json();
+        commentaries.push({ author, ...data });
+      }
+    } catch (err) {
+      console.warn(`No commentary found for ${author}/${id}`);
+    }
+  }
 
   return {
-    props: { verse, chapters },
+    props: { verse, chapters, commentaries },
   };
 }
 
-export default function VersePage() {
+export default function VersePage({ verse: initialVerse, chapters: initialChapters, commentaries: initialCommentaries }) {
   const router = useRouter();
   const { id } = router.query;        // e.g. "1.1"
 
   const [verse, setVerse] = useState(null);
+  const [chapters, setChapters] = useState(initialChapters);
+  const [commentaries, setCommentaries] = useState(initialCommentaries);
+
   const [prevId, setPrevId] = useState(null);
   const [nextId, setNextId] = useState(null);
 
@@ -55,6 +73,22 @@ export default function VersePage() {
       .then((res) => res.json())
       .then((data) => setVerse(data))
       .catch((err) => console.error("Error loading verse:", err));
+
+    // Load commentaries dynamically (if not preloaded)
+    const commentaryAuthors = ["shankara", "ramanuja", "madhva", "jayateertha", "raghevendra"]; // add more later if needed
+    Promise.all(
+      commentaryAuthors.map(async (author) => {
+        try {
+          const res = await fetch(`${base}/commentaries/${author}/${id}.json`);
+          if (res.ok) {
+            const data = await res.json();
+            return { author, ...data };
+          }
+        } catch {
+          return null;
+        }
+      })
+    ).then((results) => setCommentaries(results.filter(Boolean)));
 
     // Load chapters.json to compute navigation
     fetch(`${base}/chapters.json`)
@@ -79,7 +113,7 @@ export default function VersePage() {
     <main className="layout">
       <Sidebar />
       <div className="content">
-        <VerseCard verse={verse} />
+        <VerseCard verse={verse} commentaries={commentaries} />
 
         <div className="nav-buttons">
           {prevId && (

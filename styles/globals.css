@@ -1,8 +1,13 @@
+html, #__next {
+  height: 100%;
+}
+
 body {
   font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
   margin: 0;
   background: #fffaf4;
   color: #333;
+  height: 100%;
 }
 a { color: #c77d28; text-decoration: none; }
 a:hover { text-decoration: underline; }
