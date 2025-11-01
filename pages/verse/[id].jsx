@@ -3,9 +3,20 @@ import { useRouter } from "next/router";
 import Sidebar from "../../components/Sidebar";
 import VerseCard from "../../components/VerseCard";
 
-const base = process.env.NEXT_PUBLIC_DATA_BASE || "https://vivsrivas.github.io/gita-data";
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "gita-site";
+const base =
+  process.env.DATA_BASE ||  // visible to Node during build & dev
+  process.env.NEXT_PUBLIC_DATA_BASE || 
+  "https://vivsrivas.github.io/gita-data";
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "gita-site";
+export const authors = (
+  process.env.COMMENTARY_AUTHORS ||
+  process.env.NEXT_PUBLIC_COMMENTARY_AUTHORS ||
+  ""
+)
+  .split(",")
+  .map((a) => a.trim())
+  .filter(Boolean);
 /**
  * Tell Next.js which verse pages to pre-render at build time
  */
@@ -27,25 +38,40 @@ export async function getStaticProps({ params }) {
   const { id } = params;
   const [chapter, verseNum] = id.split(".");
 
-  const resVerse = await fetch(`${base}/verses/${id}.json`);
-  const verse = await resVerse.json();
+  const safeFetchJSON = async (url, label) => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.warn(`⚠️ ${label} not found (${res.status}): ${url}`);
+        return null;
+      }
 
-  const resChapters = await fetch(`${base}/chapters.json`);
-  const chapters = await resChapters.json();
+      const text = await res.text();
+      if (text.trim().startsWith("<")) {
+        console.warn(`⚠️ ${label} returned HTML (not JSON): ${url}`);
+        return null;
+      }
+
+      return JSON.parse(text);
+    } catch (err) {
+      console.warn(`⚠️ Failed to load ${label}:`, err.message);
+      return null;
+    }
+  };
+
+    // 🔹 Verse
+  const verse = await safeFetchJSON(`${base}/verses/${id}.json`, `Verse ${id}`);
+  // 🔹 Chapters (for sidebar)
+  const chapters = await safeFetchJSON(`${base}/chapters.json`, "Chapters");
   // 🔹 Attempt to load multiple commentaries
-  const commentaryAuthors = ["shankara", "ramanuja", "madhva", "jayateertha", "raghevendra"]; // add more later if needed
   const commentaries = [];
 
-  for (const author of commentaryAuthors) {
-    try {
-      const res = await fetch(`${base}/commentaries/${author}/${id}.json`);
-      if (res.ok) {
-        const data = await res.json();
-        commentaries.push({ author, ...data });
-      }
-    } catch (err) {
-      console.warn(`No commentary found for ${author}/${id}`);
-    }
+  for (const author of authors) {
+      const c = await safeFetchJSON(`${base}/commentaries/${author}/${id}.json`, `Commentary ${author}/${id}`);
+      if (c) {
+        commentaries.push({ author, ...c })
+        console.log(`✅ Loaded commentary: ${author} for verse ${id}`);
+      };
   }
 
   return {
@@ -57,8 +83,7 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
   const router = useRouter();
   const { id } = router.query;        // e.g. "1.1"
 
-  const [verse, setVerse] = useState(null);
-  const [chapters, setChapters] = useState(initialChapters);
+  const [verse, setVerse] = useState(initialVerse);
   const [commentaries, setCommentaries] = useState(initialCommentaries);
 
   const [prevId, setPrevId] = useState(null);
@@ -67,7 +92,7 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
   // 🔹 Load verse + navigation whenever id changes
   useEffect(() => {
     if (!id) return;
-
+    
     // Load verse JSON
     fetch(`${base}/verses/${id}.json`)
       .then((res) => res.json())
@@ -75,9 +100,8 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
       .catch((err) => console.error("Error loading verse:", err));
 
     // Load commentaries dynamically (if not preloaded)
-    const commentaryAuthors = ["shankara", "ramanuja", "madhva", "jayateertha", "raghevendra"]; // add more later if needed
     Promise.all(
-      commentaryAuthors.map(async (author) => {
+      authors.map(async (author) => {
         try {
           const res = await fetch(`${base}/commentaries/${author}/${id}.json`);
           if (res.ok) {
@@ -88,7 +112,10 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
           return null;
         }
       })
-    ).then((results) => setCommentaries(results.filter(Boolean)));
+    ).then((results) => {
+      console.log("Fetched commentaries:", results); 
+      setCommentaries(results.filter(Boolean))
+    });
 
     // Load chapters.json to compute navigation
     fetch(`${base}/chapters.json`)

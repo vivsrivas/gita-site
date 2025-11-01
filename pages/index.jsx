@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import SearchBox from "../components/SearchBox";
-const base = process.env.NEXT_PUBLIC_DATA_BASE;
+const base =
+  process.env.DATA_BASE ||  // visible to Node during build & dev
+  process.env.NEXT_PUBLIC_DATA_BASE || 
+  "https://vivsrivas.github.io/gita-data";
+  
 export default function Home() {
   const [verses, setVerses] = useState([]);
 
