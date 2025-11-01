@@ -3,8 +3,41 @@ import { useRouter } from "next/router";
 import Sidebar from "../../components/Sidebar";
 import VerseCard from "../../components/VerseCard";
 
-const base = process.env.NEXT_PUBLIC_DATA_BASE;
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const base = process.env.NEXT_PUBLIC_DATA_BASE || "https://vivsrivas.github.io/gita-data";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "gita-site";
+
+/**
+ * Tell Next.js which verse pages to pre-render at build time
+ */
+export async function getStaticPaths() {
+  const res = await fetch(`${base}/index.json`);
+  const verses = await res.json();
+
+  const paths = verses.map((v) => ({
+    params: { id: `${v.chapter}.${v.verse}` },
+  }));
+
+  return { paths, fallback: false };
+}
+
+/**
+ * For each verse page, fetch its JSON data from gita-data
+ */
+export async function getStaticProps({ params }) {
+  const { id } = params;
+  const [chapter, verseNum] = id.split(".");
+
+  const resVerse = await fetch(`${base}/verses/${id}.json`);
+  const verse = await resVerse.json();
+
+  const resChapters = await fetch(`${base}/chapters.json`);
+  const chapters = await resChapters.json();
+
+  return {
+    props: { verse, chapters },
+  };
+}
+
 export default function VersePage() {
   const router = useRouter();
   const { id } = router.query;        // e.g. "1.1"
