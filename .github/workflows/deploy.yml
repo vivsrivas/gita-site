@@ -1,0 +1,47 @@
+name: Deploy Bhagavad Gita Site
+
+on:
+  push:
+    branches: ["main"]     # run on pushes to main
+  workflow_dispatch:       # allow manual runs
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout site repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone latest gita-data
+        run: |
+          echo "📥 Cloning latest gita-data..."
+          git clone --depth 1 https://github.com/vivsrivas/gita-data.git ./public/data
+          ls ./public/data
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
+        env:
+          NEXT_PUBLIC_DATA_BASE: https://vivsrivas.github.io/gita-data
+        run: npm run build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
