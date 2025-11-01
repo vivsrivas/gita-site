@@ -17,12 +17,19 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository with submodules
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: recursive      # ✅ clones gita-data
+
+      - name: Clone latest gita-data
+        run: |
+          echo "📥 Cloning gita-data..."
+          rm -rf public/data
+          git clone --depth 1 https://github.com/vivsrivas/gita-data.git public/data
+          ls public/data
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -41,7 +48,7 @@ jobs:
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out                # ✅ the folder Next.js exported
+          path: ./out
 
   deploy:
     environment:
