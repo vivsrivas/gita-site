@@ -1,59 +1,30 @@
-# Node
-node_modules/
+# Node / Next.js
+node_modules
+.next
+out
+.cache
+dist
+
+# Env files (keep secrets local)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
-# Next.js
-.next/
-.next/cache/
-out/
-build/
-
-# Environment variables
-.env.local
-.env.*.local
-
-# Vercel / deployment
-.vercel/
-.now/
-.next/standalone/
-
-# Editor and OS files
-.DS_Store
-Thumbs.db
-*.swp
-
-# IDEs
-.vscode/
-.idea/
-*.sublime-workspace
-*.sublime-project
-
-# Build and cache
-.cache/
-.cache-loader/
-.parcel-cache/
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-coverage/
-dist/
-
-# Yarn PnP
-.pnp/
-.pnp.js
-.pnp.cjs
-
-# Logs and reports
-coverage/
-report/
 *.log
 
-# Misc
-*.pem
-.sentryclirc
-.envrc
+# Mac & OS
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+
+# Deployment
+public/data/         # cloned dynamically from gita-data
 tmp/
