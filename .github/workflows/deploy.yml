@@ -25,6 +25,7 @@ jobs:
       - name: Clone latest gita-data
         run: |
           echo "📥 Cloning latest gita-data..."
+          rm -rf ./public/data
           git clone --depth 1 https://github.com/vivsrivas/gita-data.git ./public/data
           ls ./public/data
 
