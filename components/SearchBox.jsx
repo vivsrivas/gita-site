@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Fuse from "fuse.js";
 
 const base = process.env.NEXT_PUBLIC_DATA_BASE;
-
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 export default function SearchBox() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -50,7 +50,7 @@ export default function SearchBox() {
         <ul className="search-results">
           {results.map((v) => (
             <li key={v.id}>
-              <a href={`/verse/${v.id}`}>
+              <a href={`${basePath}/verse/${v.id}`}>
                 <strong>{v.id}</strong> — {v.sanskrit.slice(0, 30)}…
                 <br />
                 <small>{v.translation.slice(0, 80)}…</small>

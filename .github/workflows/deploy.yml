@@ -42,6 +42,7 @@ jobs:
 
       - name: Build static site
         env:
+          NEXT_PUBLIC_BASE_PATH: /gita-site
           NEXT_PUBLIC_DATA_BASE: https://vivsrivas.github.io/gita-data
         run: npm run build
 

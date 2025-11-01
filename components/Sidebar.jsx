@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 const base = process.env.NEXT_PUBLIC_DATA_BASE;
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 export default function Sidebar({ onSelect }) {
   const [chapters, setChapters] = useState([]);
 
@@ -21,7 +22,7 @@ export default function Sidebar({ onSelect }) {
           <ul>
             {ch.verses.map((id) => (
               <li key={id}>
-                <a href={`/verse/${id}`} onClick={() => onSelect?.()}>
+                <a href={`${basePath}/verse/${id}`} onClick={() => onSelect?.()}>
                   {id}
                 </a>
               </li>

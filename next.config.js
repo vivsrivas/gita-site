@@ -14,8 +14,8 @@ const nextConfig = {
   output: "export",            // ✅ enables static export
   trailingSlash: true,         // ✅ required for GitHub Pages
   images: { unoptimized: true },
-  basePath,                    // ✅ serve from /gita-site/
-  assetPrefix,                 // ✅ prefix static assets correctly
+  basePath: "/gita-site",
+  assetPrefix: "/gita-site",                 // ✅ prefix static assets correctly,
 };
 
 module.exports = nextConfig;

@@ -4,6 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import VerseCard from "../../components/VerseCard";
 
 const base = process.env.NEXT_PUBLIC_DATA_BASE;
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 export default function VersePage() {
   const router = useRouter();
   const { id } = router.query;        // e.g. "1.1"
@@ -66,7 +67,7 @@ export default function VersePage() {
           )}
         </div>
 
-        <a href="/" className="back-link">
+        <a href={`${basePath}/`} className="back-link">
           ⟵ Back to Chapters
         </a>
       </div>
