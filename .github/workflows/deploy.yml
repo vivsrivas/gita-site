@@ -2,38 +2,33 @@ name: Deploy Bhagavad Gita Site
 
 on:
   push:
-    branches: ["main"]     # run on pushes to main
-  workflow_dispatch:       # allow manual runs
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
+jobs:
+  build:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout site repo
+      - name: Checkout repository with submodules
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: false      # ✅ prevents any submodule attempt
-          persist-credentials: false
-
-      - name: Clone latest gita-data
-        run: |
-          echo "📥 Cloning latest gita-data..."
-          rm -rf ./public/data
-          git clone --depth 1 https://github.com/vivsrivas/gita-data.git ./public/data
-          ls ./public/data
+          submodules: recursive      # ✅ clones gita-data
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -43,9 +38,18 @@ jobs:
           NEXT_PUBLIC_DATA_BASE: https://vivsrivas.github.io/gita-data
         run: npm run build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./out
-          publish_branch: gh-pages
+          path: ./out                # ✅ the folder Next.js exported
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
