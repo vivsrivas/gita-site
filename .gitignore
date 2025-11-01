@@ -26,5 +26,4 @@ pnpm-debug.log*
 .idea/
 
 # Deployment
-public/data/         # cloned dynamically from gita-data
 tmp/
