@@ -11,6 +11,8 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
 
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
 
+  const contentRef = useRef(null);
+
   // Ensure client-only features
   useEffect(() => {
     setIsClient(true);
@@ -38,13 +40,18 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
   }, [router.asPath, isClient]);
 
   // Scroll to the active verse
+  // Scroll to the active verse only if navigation came from sidebar clicks
   useEffect(() => {
-    if (activeVerseRef.current) {
-      activeVerseRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+    if (!activeVerseRef.current) return;
+    // prevent scroll when coming from "Next"/"Previous" navigation
+    if (window.__skipSidebarScroll) {
+      window.__skipSidebarScroll = false;
+      return;
     }
+    activeVerseRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   }, [activeId]);
 
   // Expand/collapse chapter
@@ -71,11 +78,11 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
   return (
     <>
       <aside
-        className={`fixed sm:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 shadow-lg transform transition-transform duration-200 ease-in-out ${
+        className={`fixed sm:static inset-y-0 overflow-y-auto left-0 z-40 w-64 bg-white border-r border-gray-200 shadow-lg transform transition-transform duration-200 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
         }`}
       >
-        <div className="p-4 h-full overflow-y-auto">
+        <div className="p-4 h-full">
           {/* Mobile header */}
           <div className="flex items-center justify-between mb-4 sm:hidden">
             <h2 className="text-lg font-semibold text-gray-700">Chapters</h2>
@@ -134,7 +141,12 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                             <li key={vid || i} ref={isActiveVerse ? activeVerseRef : null}>
                               <a
                                 href={`${basePath}/verse/${vid}`}
-                                onClick={() => setOpen(false)}
+                                onClick={(e) => {
+                                  e.preventDefault();        // stop full page scroll
+                                  window.__skipSidebarScroll = true; // tell sidebar not to auto-scroll
+                                  router.push(`/verse/${vid}`);      // smooth route change
+                                  setOpen(false);
+                                }}
                                 className={`block p-1 text-sm transition ${
                                   isActiveVerse
                                     ? "bg-blue-100 text-blue-800 font-semibold"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import { Search } from "lucide-react";
@@ -29,9 +29,9 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="flex flex-col min-h-screen">
+    <main className="flex h-screen overflow-hidden">
       <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div className="flex flex-1 pt-[64px]">
+      <div ref={contentRef} className="flex flex-1 pt-[64px]">
         <Sidebar
           chapters={chapters}
           verses={verses}

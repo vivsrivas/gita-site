@@ -15,6 +15,10 @@ body {
 }
 a { color: #c77d28; text-decoration: none; }
 a:hover { text-decoration: underline; }
+a:focus {
+  outline: none;
+  scroll-margin: 0;
+}
 header, footer {
   text-align: center;
   padding: 1rem;

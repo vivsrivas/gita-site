@@ -5,8 +5,18 @@ export default function VerseCard({ verse, commentaries = [] }) {
   return (
     <div className="verse-card">
       <h2>{verse.chapter}.{verse.verse_number}</h2>
-      <p className="sanskrit">{verse.text_sanskrit}</p>
-      <p><strong>Translation:</strong> {verse.translation}</p>
+      <p className="sanskrit mb-6 font-semibold whitespace-pre-line leading-relaxed">
+        {verse.text_sanskrit
+          .split("।")
+          .filter(Boolean)
+          .map((part, idx) => (
+            <span key={idx}>
+              {part.trim()}।
+              <br />
+            </span>
+          ))}
+      </p>
+      <p className="mb-6">{verse.translation}</p>
 
       {verse.commentary && (
         <div className="commentaries">
@@ -36,9 +46,9 @@ export default function VerseCard({ verse, commentaries = [] }) {
                 </p>
 
                 {/* ✅ Updated Markdown rendering */}
-                <div className="prose prose-sm text-gray-800">
+                <div className="prose prose-sm max-w-none text-gray-800">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {c.commentary}
+                    {c.commentary || ""}
                   </ReactMarkdown>
                 </div>
 

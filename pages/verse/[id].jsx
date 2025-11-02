@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import Sidebar from "../../components/Sidebar";
 import VerseCard from "../../components/VerseCard";
@@ -133,8 +133,18 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
   }, [id]);
 
   // 🔹 Navigation without reload
+  const contentRef = useRef(null);
+
   const goToVerse = (newId) => {
-    router.push(`/verse/${newId}`, undefined, { shallow: true });
+    // tell sidebar to skip its scrollIntoView on next render
+    window.__skipSidebarScroll = true;
+
+    router.push(`/verse/${newId}`, undefined, { shallow: true }).then(() => {
+      // scroll only the content area, not the window
+      if (contentRef.current) {
+        contentRef.current.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
   };
 
   if (!verse) return <p>Loading...</p>;
@@ -146,7 +156,7 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
         <Sidebar chapters={chapters} 
           open={sidebarOpen}
           setOpen={setSidebarOpen} />
-        <div className="content flex-1 p-4">
+        <div ref={contentRef} className="content flex-1 overflow-y-auto px-4 py-6 scroll-smooth">
           <VerseCard verse={verse} commentaries={commentaries} />
 
           <div className="nav-buttons">
