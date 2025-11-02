@@ -1,72 +1,68 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import { Search } from "lucide-react";
 import SearchBox from "../components/SearchBox";
 
 const base =
-  process.env.DATA_BASE ||  // visible to Node during build & dev
-  process.env.NEXT_PUBLIC_DATA_BASE || 
+  process.env.DATA_BASE ||
+  process.env.NEXT_PUBLIC_DATA_BASE ||
   "https://vivsrivas.github.io/gita-data";
-  
-/**
- * ✅ Build-time data fetch (so export never fails)
- */
+
 export async function getStaticProps() {
   const safeFetchJSON = async (url, label) => {
     try {
       const res = await fetch(url);
-      if (!res.ok) {
-        console.warn(`⚠️ ${label} not found (${res.status}): ${url}`);
-        return [];
-      }
-
+      if (!res.ok) return [];
       const text = await res.text();
-      if (!text.trim() || text.trim().startsWith("<")) {
-        console.warn(`⚠️ ${label} returned invalid or HTML content: ${url}`);
-        return [];
-      }
-
+      if (text.trim().startsWith("<")) return [];
       const parsed = JSON.parse(text);
       return Array.isArray(parsed) ? parsed : [];
-    } catch (err) {
-      console.warn(`⚠️ Failed to load ${label}:`, err.message);
+    } catch {
       return [];
     }
   };
 
-  let chapters = [];
-  let verses = [];
+  const [chapters, verses] = await Promise.all([
+    safeFetchJSON(`${base}/chapters.json`, "Chapters"),
+    safeFetchJSON(`${base}/index.json`, "Verses"),
+  ]);
 
-  try {
-    [chapters, verses] = await Promise.all([
-      safeFetchJSON(`${base}/chapters.json`, "Chapters"),
-      safeFetchJSON(`${base}/index.json`, "Verses"),
-    ]);
-  } catch (err) {
-    console.error("❌ getStaticProps failed:", err);
-  }
-
-  // ✅ Ensure we always return valid props
   return {
     props: {
-      chapters: Array.isArray(chapters) ? chapters : [],
-      verses: Array.isArray(verses) ? verses : [],
+      chapters,
+      verses,
     },
   };
 }
-export default function Home() {
-  const [verses, setVerses] = useState([]);
-  const [chapters, setChapters] = useState([]);
+
+export default function Home({ chapters: initialChapters = [], verses: initialVerses = [] }) {
+  const [chapters, setChapters] = useState(initialChapters);
+  const [verses, setVerses] = useState(initialVerses);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // 🔹 Re-fetch data on client mount to ensure hydration updates work
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [chaptersRes, versesRes] = await Promise.all([
+          fetch(`${base}/chapters.json`).then((r) => r.json()),
+          fetch(`${base}/index.json`).then((r) => r.json()),
+        ]);
+        setChapters(chaptersRes);
+        setVerses(versesRes);
+      } catch (err) {
+        console.error("Error reloading data on client:", err);
+      }
+    };
+    loadData();
+  }, []);
+
   return (
-    <main className="flex h-screen overflow-hidden">
+    <main className="flex flex-col min-h-screen">
       <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex flex-1 pt-[64px]">
         <Sidebar
           chapters={chapters}
-          verses={verses}
           open={sidebarOpen}
           setOpen={setSidebarOpen}
         />
@@ -75,7 +71,7 @@ export default function Home() {
           {/* 🔹 Search Section */}
           <div className="w-full max-w-2xl mt-4">
             {verses.length > 0 ? (
-              <SearchBox verses={verses} />
+            <SearchBox verses={verses} />
             ) : (
               <p className="text-gray-500 text-center">Loading verses...</p>
             )}
