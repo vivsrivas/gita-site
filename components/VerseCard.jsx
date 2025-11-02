@@ -23,10 +23,10 @@ export default function VerseCard({ verse, commentaries = [] }) {
           {commentaries.map((c) => (
             <blockquote
               key={c.author}
-              className="border-l-4 border-blue-400 pl-3 mb-4"
+              className="border-l-4 border-gita-400 pl-3 mb-4"
             >
-              <p className="font-medium text-gray-900">{c.author} <span className="text-gray-600 text-sm">[ {c.book} ]</span></p>
-              <p className="text-sm text-gray-700 whitespace-pre-line">
+              <p className="font-medium text-gray-900 mb-4">{c.author} <span className="text-gray-400">[ {c.book} ]</span></p>
+              <p className="text-medium text-gray-700 whitespace-pre-line mb-4">
                 {c.commentary}
               </p>
               <p>

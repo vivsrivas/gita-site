@@ -38,18 +38,19 @@ export default function SearchBox() {
   };
 
   return (
-    <div className="search">
+    <div className="flex flex-col items-center justify-center text-center mx-auto my-8 max-w-md w-full">
       <input
         type="text"
         placeholder="Search Sanskrit, ITRANS, or English..."
         value={query}
         onChange={onSearch}
+        className="w-full h-8 rounded-md border border-gray-300 px-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
       />
 
       {query && (
-        <ul className="search-results">
+        <ul className="list-none w-full p-0 m-0">
           {results.map((v) => (
-            <li key={v.id}>
+            <li className="mb-2 text-left" key={v.id}>
               <a href={`${basePath}/verse/${v.id}`}>
                 <strong>{v.id}</strong> — {v.sanskrit.slice(0, 30)}…
                 <br />

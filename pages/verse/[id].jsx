@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Sidebar from "../../components/Sidebar";
 import VerseCard from "../../components/VerseCard";
+import Header from "../../components/Header";
 
 const base =
   process.env.DATA_BASE ||  // visible to Node during build & dev
@@ -84,7 +85,9 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
   const { id } = router.query;        // e.g. "1.1"
 
   const [verse, setVerse] = useState(initialVerse);
+  const [chapters, setChapters] = useState(initialChapters);
   const [commentaries, setCommentaries] = useState(initialCommentaries);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [prevId, setPrevId] = useState(null);
   const [nextId, setNextId] = useState(null);
@@ -138,32 +141,37 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
 
   return (
     <main className="layout">
-      <Sidebar />
-      <div className="content">
-        <VerseCard verse={verse} commentaries={commentaries} />
+      <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex flex-1 pt-[50px]"> {/* padding = header height */}
+        <Sidebar chapters={chapters} 
+          open={sidebarOpen}
+          setOpen={setSidebarOpen} />
+        <div className="content flex-1 p-4">
+          <VerseCard verse={verse} commentaries={commentaries} />
 
-        <div className="nav-buttons">
-          {prevId && (
-            <button
-              className="nav-link prev"
-              onClick={() => goToVerse(prevId)}
-            >
-              ← Previous
-            </button>
-          )}
-          {nextId && (
-            <button
-              className="nav-link next"
-              onClick={() => goToVerse(nextId)}
-            >
-              Next →
-            </button>
-          )}
+          <div className="nav-buttons">
+            {prevId && (
+              <button
+                className="nav-link prev"
+                onClick={() => goToVerse(prevId)}
+              >
+                ← Previous
+              </button>
+            )}
+            {nextId && (
+              <button
+                className="nav-link next"
+                onClick={() => goToVerse(nextId)}
+              >
+                Next →
+              </button>
+            )}
+          </div>
+
+          <a href={`${basePath}/`} className="back-link">
+            ⟵ Back to Chapters
+          </a>
         </div>
-
-        <a href={`${basePath}/`} className="back-link">
-          ⟵ Back to Chapters
-        </a>
       </div>
     </main>
   );
