@@ -1,3 +1,6 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
 export default function VerseCard({ verse, commentaries = [] }) {
   return (
     <div className="verse-card">
@@ -20,20 +23,32 @@ export default function VerseCard({ verse, commentaries = [] }) {
           <h3 className="text-md font-semibold mb-2 text-gray-700">
             Commentaries:
           </h3>
-          {commentaries.map((c) => (
-            <blockquote
-              key={c.author}
-              className="border-l-4 border-gita-400 pl-3 mb-4"
-            >
-              <p className="font-medium text-gray-900 mb-4">{c.author} <span className="text-gray-400">[ {c.book} ]</span></p>
-              <p className="text-medium text-gray-700 whitespace-pre-line mb-4">
-                {c.commentary}
-              </p>
-              <p>
-                {c.translation}
-              </p>
-            </blockquote>
-          ))}
+            {commentaries.map((c) => (
+              <blockquote
+                key={c.author}
+                className="border-l-4 border-blue-400 pl-4 mb-6"
+              >
+                <p className="font-semibold text-gray-900 mb-2">
+                  {c.author}{" "}
+                  {c.book && (
+                    <span className="text-gray-600 text-sm">[ {c.book} ]</span>
+                  )}
+                </p>
+
+                {/* ✅ Updated Markdown rendering */}
+                <div className="prose prose-sm text-gray-800">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {c.commentary}
+                  </ReactMarkdown>
+                </div>
+
+                {c.translation && (
+                  <p className="mt-3 text-sm text-gray-700">
+                    “{c.translation}”
+                  </p>
+                )}
+              </blockquote>
+            ))}
         </section>
       )}
     </div>

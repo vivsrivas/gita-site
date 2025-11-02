@@ -107,7 +107,7 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                     {/* Chapter button */}
                     <button
                       onClick={() => toggleExpand(num)}
-                      className={`flex items-center justify-between w-full p-2 rounded-lg transition font-medium ${
+                      className={`flex items-center justify-between w-full p-2 transition font-medium ${
                         isActiveChapter
                           ? "bg-amber-100 text-amber-800 border border-amber-300"
                           : "text-gray-800 hover:bg-gray-100"
@@ -135,7 +135,7 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                               <a
                                 href={`${basePath}/verse/${vid}`}
                                 onClick={() => setOpen(false)}
-                                className={`block p-1 rounded text-sm transition ${
+                                className={`block p-1 text-sm transition ${
                                   isActiveVerse
                                     ? "bg-blue-100 text-blue-800 font-semibold"
                                     : "text-gray-700 hover:bg-gray-50"
