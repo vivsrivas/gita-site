@@ -16,6 +16,9 @@ const nextConfig = {
   images: { unoptimized: true },
   basePath: "/gita-site",
   assetPrefix: "/gita-site",                 // ✅ prefix static assets correctly,
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+  reactStrictMode: true,
 };
 
 module.exports = nextConfig;

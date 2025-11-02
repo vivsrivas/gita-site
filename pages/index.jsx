@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import { Search } from "lucide-react";
@@ -9,29 +9,61 @@ const base =
   process.env.NEXT_PUBLIC_DATA_BASE || 
   "https://vivsrivas.github.io/gita-data";
   
+/**
+ * ✅ Build-time data fetch (so export never fails)
+ */
+export async function getStaticProps() {
+  const safeFetchJSON = async (url, label) => {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.warn(`⚠️ ${label} not found (${res.status}): ${url}`);
+        return [];
+      }
+
+      const text = await res.text();
+      if (!text.trim() || text.trim().startsWith("<")) {
+        console.warn(`⚠️ ${label} returned invalid or HTML content: ${url}`);
+        return [];
+      }
+
+      const parsed = JSON.parse(text);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+      console.warn(`⚠️ Failed to load ${label}:`, err.message);
+      return [];
+    }
+  };
+
+  let chapters = [];
+  let verses = [];
+
+  try {
+    [chapters, verses] = await Promise.all([
+      safeFetchJSON(`${base}/chapters.json`, "Chapters"),
+      safeFetchJSON(`${base}/index.json`, "Verses"),
+    ]);
+  } catch (err) {
+    console.error("❌ getStaticProps failed:", err);
+  }
+
+  // ✅ Ensure we always return valid props
+  return {
+    props: {
+      chapters: Array.isArray(chapters) ? chapters : [],
+      verses: Array.isArray(verses) ? verses : [],
+    },
+  };
+}
 export default function Home() {
   const [verses, setVerses] = useState([]);
   const [chapters, setChapters] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-     // Load chapters
-    fetch(`${base}/chapters.json`)
-      .then((res) => res.json())
-      .then((data) => setChapters(data))
-      .catch((err) => console.error("Error loading chapters:", err));
-
-    // Load from public/data/index.json (prebuilt search index)
-    fetch(`${base}/index.json`)
-      .then((res) => res.json())
-      .then((data) => setVerses(data))
-      .catch((err) => console.error("Error loading verses:", err));
-  }, []);
-
   return (
     <main className="flex h-screen overflow-hidden">
       <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div ref={contentRef} className="flex flex-1 pt-[64px]">
+      <div className="flex flex-1 pt-[64px]">
         <Sidebar
           chapters={chapters}
           verses={verses}

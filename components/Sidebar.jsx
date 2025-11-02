@@ -11,8 +11,6 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
 
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
 
-  const contentRef = useRef(null);
-
   // Ensure client-only features
   useEffect(() => {
     setIsClient(true);
