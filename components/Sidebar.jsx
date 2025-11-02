@@ -1,23 +1,82 @@
-import { useState } from "react";
-import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
 
-export default function Sidebar({ chapters = [], onSelect, open, setOpen }) {
+export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
   const [expanded, setExpanded] = useState(null);
+  const [activeId, setActiveId] = useState(null);
+  const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
+  const activeVerseRef = useRef(null);
+
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
 
-  const toggleExpand = (chapterNumber) => {
-    setExpanded(expanded === chapterNumber ? null : chapterNumber);
+  // Ensure client-only features
+  useEffect(() => {
+    setIsClient(true);
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("expandedChapter");
+      if (saved) setExpanded(Number(saved));
+    }
+  }, []);
+
+  // Track current route to highlight verse & open correct chapter
+  useEffect(() => {
+    if (!isClient || !router.asPath) return;
+
+    const match = router.asPath.match(/\/verse\/(\d+\.\d+)/);
+    if (match) {
+      const id = match[1];
+      setActiveId(id);
+      const currentChapter = parseInt(id.split(".")[0]);
+      setExpanded(currentChapter);
+      localStorage.setItem("expandedChapter", currentChapter);
+    } else {
+      const saved = localStorage.getItem("expandedChapter");
+      setExpanded(saved ? Number(saved) : null);
+    }
+  }, [router.asPath, isClient]);
+
+  // Scroll to the active verse
+  useEffect(() => {
+    if (activeVerseRef.current) {
+      activeVerseRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [activeId]);
+
+  // Expand/collapse chapter
+  const toggleExpand = (num) => {
+    setExpanded((prev) => {
+      const newVal = prev === num ? null : num;
+      if (typeof window !== "undefined") {
+        if (newVal) localStorage.setItem("expandedChapter", newVal);
+        else localStorage.removeItem("expandedChapter");
+      }
+      return newVal;
+    });
   };
+
+  // Build a verse lookup by chapter (if verses[] provided)
+  const versesByChapter = verses.reduce((acc, v) => {
+    const cnum = parseInt(v.chapter);
+    if (!acc[cnum]) acc[cnum] = [];
+    acc[cnum].push(v);
+    acc[cnum].sort((a, b) => a.verse - b.verse);
+    return acc;
+  }, {});
 
   return (
     <>
-      {/* 🔹 Sidebar (collapsible on mobile) */}
       <aside
-        className={`fixed sm:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 shadow-lg transform transition-transform duration-200 ease-in-out
-          ${open ? "translate-x-0" : "-translate-x-full sm:translate-x-0"}`}
+        className={`fixed sm:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 shadow-lg transform transition-transform duration-200 ease-in-out ${
+          open ? "translate-x-0" : "-translate-x-full sm:translate-x-0"
+        }`}
       >
         <div className="p-4 h-full overflow-y-auto">
-          {/* 🔹 Header for sidebar */}
+          {/* Mobile header */}
           <div className="flex items-center justify-between mb-4 sm:hidden">
             <h2 className="text-lg font-semibold text-gray-700">Chapters</h2>
             <button
@@ -28,51 +87,76 @@ export default function Sidebar({ chapters = [], onSelect, open, setOpen }) {
             </button>
           </div>
 
-          {/* 🔹 Chapter list */}
+          {/* Chapter list */}
           {chapters.length === 0 ? (
             <p className="text-sm text-gray-500">Loading chapters...</p>
           ) : (
             <ul className="space-y-2">
-              {chapters.map((chapter) => (
-                <li key={chapter.number}>
-                  <button
-                    onClick={() => toggleExpand(chapter.number)}
-                    className="flex items-center justify-between w-full p-2 rounded-lg hover:bg-gray-100 transition text-gray-800 font-medium"
-                  >
-                    <span>
-                      {chapter.number}. {chapter.title}
-                    </span>
-                    {expanded === chapter.number ? (
-                      <ChevronDown size={16} />
-                    ) : (
-                      <ChevronRight size={16} />
-                    )}
-                  </button>
+              {chapters.map((chapter, index) => {
+                const num = Number(chapter.number || chapter.id || index + 1);
+                const isOpen = expanded === num;
+                const isActiveChapter =
+                  activeId && Number(activeId.split(".")[0]) === num;
 
-                  {/* 🔹 Verses under expanded chapter */}
-                  {expanded === chapter.number && (
-                    <ul className="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-3">
-                      {chapter.verses?.map((verseId) => (
-                        <li key={verseId}>
-                          <a
-                            href={`${basePath}/verse/${verseId}`}
-                            onClick={() => setOpen(false)}
-                            className="block p-1 rounded hover:bg-gray-50 text-sm text-gray-700"
-                          >
-                            Verse {verseId}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
-              ))}
+                // Get verse list for this chapter
+                const verseList =
+                  versesByChapter[num] || chapter.verses || [];
+
+                return (
+                  <li key={num}>
+                    {/* Chapter button */}
+                    <button
+                      onClick={() => toggleExpand(num)}
+                      className={`flex items-center justify-between w-full p-2 rounded-lg transition font-medium ${
+                        isActiveChapter
+                          ? "bg-amber-100 text-amber-800 border border-amber-300"
+                          : "text-gray-800 hover:bg-gray-100"
+                      }`}
+                    >
+                      <span>
+                        {num}. {chapter.title || `Chapter ${num}`}
+                      </span>
+                      {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                    </button>
+
+                    {/* Verses under chapter */}
+                    {isOpen && (
+                      <ul className="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-3">
+                        {verseList.map((v, i) => {
+                          // Handle both array-of-strings or objects
+                          const vid =
+                            typeof v === "string"
+                              ? v
+                              : `${v.chapter}.${v.verse}`;
+                          const isActiveVerse = activeId === vid;
+
+                          return (
+                            <li key={vid || i} ref={isActiveVerse ? activeVerseRef : null}>
+                              <a
+                                href={`${basePath}/verse/${vid}`}
+                                onClick={() => setOpen(false)}
+                                className={`block p-1 rounded text-sm transition ${
+                                  isActiveVerse
+                                    ? "bg-blue-100 text-blue-800 font-semibold"
+                                    : "text-gray-700 hover:bg-gray-50"
+                                }`}
+                              >
+                                Verse {vid}
+                              </a>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
       </aside>
 
-      {/* 🔹 Overlay (for mobile) */}
+      {/* Overlay for mobile */}
       {open && (
         <div
           className="fixed inset-0 bg-black bg-opacity-40 sm:hidden z-30"

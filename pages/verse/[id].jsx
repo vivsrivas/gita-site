@@ -168,8 +168,8 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
             )}
           </div>
 
-          <a href={`${basePath}/`} className="back-link">
-            ⟵ Back to Chapters
+          <a href={`${basePath}/`} className="back-link block text-center mt-6">
+            ⟵ Back to Home
           </a>
         </div>
       </div>

@@ -26,13 +26,6 @@ export default function Header({ sidebarOpen, setSidebarOpen, onSearch }) {
       <h1 className="text-xl font-bold tracking-wide text-[#c77d28] whitespace-nowrap">
         Bhagavad Gita
       </h1>
-
-      {/* 🔹 Centered Search Bar */}
-      <div className="flex-1 flex justify-center">
-        <div className="w-[80%] max-w-xl hidden sm:block">
-          <SearchBox onSearch={onSearch} />
-        </div>
-      </div>
     </header>
   );
 }

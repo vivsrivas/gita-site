@@ -34,6 +34,7 @@ export default function Home() {
       <div className="flex flex-1 pt-[64px]">
         <Sidebar
           chapters={chapters}
+          verses={verses}
           open={sidebarOpen}
           setOpen={setSidebarOpen}
         />
