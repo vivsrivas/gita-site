@@ -2,67 +2,106 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import ChapterCard from "../../components/ChapterCard";
+import Header from "../../components/Header";
+import { loadCommentaries } from "../../lib/loadCommentaries";
 
-const base = process.env.NEXT_PUBLIC_DATA_BASE || "https://vivsrivas.github.io/gita-data";
+const base =
+  process.env.DATA_BASE ||
+  process.env.NEXT_PUBLIC_DATA_BASE ||
+  "https://vivsrivas.github.io/gita-data";
+
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
+
+const authors = (
+  process.env.NEXT_PUBLIC_COMMENTARY_AUTHORS ||
+  process.env.COMMENTARY_AUTHORS ||
+  ""
+)
+  .split(",")
+  .map((a) => a.trim())
+  .filter(Boolean);
 
 export default function ChapterPage() {
   const router = useRouter();
   const { chapter } = router.query;
 
   const [chapterInfo, setChapterInfo] = useState(null);
+  const [chapters, setChapters] = useState([]);
   const [verses, setVerses] = useState([]);
+  const [commentaries, setCommentaries] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!chapter) return;
 
-    // Load chapters metadata
-    fetch(`${base}/chapters.json`)
-      .then((res) => res.json())
-      .then((chapters) => {
-        const ch = chapters.find((c) => c.number === Number(chapter));
-        setChapterInfo(ch);
-      })
-      .catch((err) => console.error("Error loading chapters:", err));
+    const loadData = async () => {
+      try {
+        // 🔹 Load chapters
+        const chaptersRes = await fetch(`${base}/chapters.json`);
+        const chaptersData = await chaptersRes.json();
+        setChapters(chaptersData);
 
-    // Load all verses for this chapter
-    fetch(`${base}/index.json`)
-      .then((res) => res.json())
-      .then((data) => {
-        const filtered = data.filter((v) => v.chapter === Number(chapter));
-        setVerses(filtered);
-      })
-      .catch((err) => console.error("Error loading verses:", err));
+        // Match chapter by `id` or `number`
+        const ch = chaptersData.find(
+          (c) => Number(c.id) === Number(chapter) || Number(c.number) === Number(chapter)
+        );
+        setChapterInfo(ch);
+
+        // 🔹 Load all verses
+        const versesRes = await fetch(`${base}/index.json`);
+        const versesData = await versesRes.json();
+        setVerses(versesData);
+
+        // 🔹 Load commentaries (if available)
+        const comms = await loadCommentaries({
+          base,
+          authors,
+          type: "chapters",
+          id: chapter,
+        });
+        setCommentaries(comms);
+      } catch (err) {
+        console.error("⚠️ Error loading chapter:", err);
+      }
+    };
+
+    loadData();
   }, [chapter]);
 
-  if (!chapterInfo) return <p>Loading...</p>;
+  if (!chapterInfo)
+    return (
+      <main className="flex min-h-screen items-center justify-center text-gray-600">
+        Loading chapter...
+      </main>
+    );
 
   return (
-    <main className="layout">
-      <Sidebar />
-      <div className="content p-4 sm:p-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Chapter {chapterInfo.id}: {chapterInfo.title}
-        </h2>
-        <p className="text-gray-600 mb-6">{chapterInfo.summary}</p>
+    <main className="flex flex-col min-h-screen">
+      <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex flex-1 pt-[64px]">
+        <Sidebar
+          open={sidebarOpen}
+          setOpen={setSidebarOpen}
+          chapters={chapters}
+          verses={verses}
+        />
 
-        <ul className="space-y-3">
-          {verses.map((v) => (
-            <li key={`${v.chapter}.${v.verse}`}>
-              <a
-                href={`${basePath}/verse/${v.chapter}.${v.verse}`}
-                className="block p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition"
-              >
-                <span className="font-medium text-gray-800">
-                  Verse {v.chapter}.{v.verse}
-                </span>
-                <p className="text-sm text-gray-600 truncate">
-                  {v.translation || v.text_sanskrit?.slice(0, 80)}…
-                </p>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div className="flex-1 p-6 overflow-y-auto">
+          <ChapterCard
+            chapter={chapterInfo}
+            verses={verses.filter(
+              (v) => Number(v.chapter) === Number(chapter)
+            )}
+            commentaries={commentaries}
+          />
+
+          <a
+            href={`${basePath}/`}
+            className="block text-center text-blue-700 mt-6 hover:underline"
+          >
+            ⟵ Back to Home
+          </a>
+        </div>
       </div>
     </main>
   );

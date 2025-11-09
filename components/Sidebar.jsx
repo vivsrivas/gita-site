@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
+import Link from "next/link";
+
 
 export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
   const [expanded, setExpanded] = useState(null);
@@ -138,13 +140,9 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                     {isOpen && (
                       <ul className="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-3">
                         <li>
-                          <a
-                            href={`${basePath}/?chapter=${num}`}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              router.push(`/?chapter=${num}`);
-                              setOpen(false);
-                            }}
+                          <Link
+                            href={`/chapter/${num}`}
+                            onClick={() => setOpen(false)}
                             className={`block p-1 text-sm transition ${
                               activeId === `chapter-${num}`
                                 ? "bg-blue-100 text-blue-800 font-semibold"
@@ -152,7 +150,7 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                             }`}
                           >
                             Overview
-                          </a>
+                          </Link>
                         </li>
                         {verseList.map((v, i) => {
                           const vid =
@@ -162,16 +160,11 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                           const isActiveVerse = activeId === vid;
 
                           return (
-                            <li
-                              key={vid || i}
-                              ref={isActiveVerse ? activeVerseRef : null}
-                            >
-                              <a
-                                href={`${basePath}/verse/${vid}`}
-                                onClick={(e) => {
-                                  e.preventDefault();
+                            <li key={vid || i} ref={isActiveVerse ? activeVerseRef : null}>
+                              <Link
+                                href={`/verse/${vid}`}
+                                onClick={() => {
                                   window.__skipSidebarScroll = true;
-                                  router.push(`/verse/${vid}`);
                                   setOpen(false);
                                 }}
                                 className={`block p-1 text-sm transition ${
@@ -181,7 +174,7 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                                 }`}
                               >
                                 Verse {vid}
-                              </a>
+                              </Link>
                             </li>
                           );
                         })}

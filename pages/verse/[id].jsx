@@ -68,9 +68,9 @@ export async function getStaticProps({ params }) {
   // 🔹 Attempt to load multiple commentaries
   // ✅ Unified commentary load
   const commentaries = await loadCommentaries({
-    type: "verse",
     id,
     authors,
+    type: "verses",
     base,
   });
 
