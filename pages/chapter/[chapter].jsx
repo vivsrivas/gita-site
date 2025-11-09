@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
+import ChapterCard from "../../components/ChapterCard";
 
 const base = process.env.NEXT_PUBLIC_DATA_BASE || "https://vivsrivas.github.io/gita-data";
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
@@ -41,7 +42,7 @@ export default function ChapterPage() {
       <Sidebar />
       <div className="content p-4 sm:p-6">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          Chapter {chapterInfo.number}: {chapterInfo.title}
+          Chapter {chapterInfo.id}: {chapterInfo.title}
         </h2>
         <p className="text-gray-600 mb-6">{chapterInfo.summary}</p>
 

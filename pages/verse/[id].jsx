@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import Sidebar from "../../components/Sidebar";
 import VerseCard from "../../components/VerseCard";
 import Header from "../../components/Header";
+import { loadCommentaries } from "../../lib/loadCommentaries";
 
 const base =
   process.env.DATA_BASE ||  // visible to Node during build & dev
@@ -65,15 +66,13 @@ export async function getStaticProps({ params }) {
   // 🔹 Chapters (for sidebar)
   const chapters = await safeFetchJSON(`${base}/chapters.json`, "Chapters");
   // 🔹 Attempt to load multiple commentaries
-  const commentaries = [];
-
-  for (const author of authors) {
-      const c = await safeFetchJSON(`${base}/commentaries/${author}/${id}.json`, `Commentary ${author}/${id}`);
-      if (c) {
-        commentaries.push({ author, ...c })
-        console.log(`✅ Loaded commentary: ${author} for verse ${id}`);
-      };
-  }
+  // ✅ Unified commentary load
+  const commentaries = await loadCommentaries({
+    type: "verse",
+    id,
+    authors,
+    base,
+  });
 
   return {
     props: { verse, chapters, commentaries },
@@ -106,7 +105,7 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
     Promise.all(
       authors.map(async (author) => {
         try {
-          const res = await fetch(`${base}/commentaries/${author}/${id}.json`);
+          const res = await fetch(`${base}/commentaries/${author}/verses/${id}.json`);
           if (res.ok) {
             const data = await res.json();
             return { author, ...data };
@@ -179,7 +178,7 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
           </div>
 
           <a href={`${basePath}/`} className="back-link block text-center mt-6">
-            ⟵ Back to Home
+            🕉 Back to Home
           </a>
         </div>
       </div>

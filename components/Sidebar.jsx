@@ -6,12 +6,12 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
   const [expanded, setExpanded] = useState(null);
   const [activeId, setActiveId] = useState(null);
   const [isClient, setIsClient] = useState(false);
-  const router = useRouter();
   const activeVerseRef = useRef(null);
+  const router = useRouter();
 
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
 
-  // Ensure client-only features
+  // ✅ Enable client-only features
   useEffect(() => {
     setIsClient(true);
     if (typeof window !== "undefined") {
@@ -20,16 +20,23 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
     }
   }, []);
 
-  // Track current route to highlight verse & open correct chapter
+  // ✅ Determine current page (chapter or verse)
   useEffect(() => {
     if (!isClient || !router.asPath) return;
 
-    const match = router.asPath.match(/\/verse\/(\d+\.\d+)/);
-    if (match) {
-      const id = match[1];
+    const verseMatch = router.asPath.match(/\/verse\/(\d+\.\d+)/);
+    const chapterMatch = router.asPath.match(/\/\?chapter=(\d+)/);
+
+    if (verseMatch) {
+      const id = verseMatch[1];
       setActiveId(id);
       const currentChapter = parseInt(id.split(".")[0]);
       setExpanded(currentChapter);
+      localStorage.setItem("expandedChapter", currentChapter);
+    } else if (chapterMatch) {
+      const currentChapter = parseInt(chapterMatch[1]);
+      setExpanded(currentChapter);
+      setActiveId(`chapter-${currentChapter}`);
       localStorage.setItem("expandedChapter", currentChapter);
     } else {
       const saved = localStorage.getItem("expandedChapter");
@@ -37,22 +44,21 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
     }
   }, [router.asPath, isClient]);
 
-  // Scroll to the active verse
-  // Scroll to the active verse only if navigation came from sidebar clicks
+  // ✅ Prevent unwanted scrolls when navigating via Next/Prev
   useEffect(() => {
-    if (!activeVerseRef.current) return;
-    // prevent scroll when coming from "Next"/"Previous" navigation
     if (window.__skipSidebarScroll) {
       window.__skipSidebarScroll = false;
       return;
     }
-    activeVerseRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
+    if (activeVerseRef.current) {
+      activeVerseRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
   }, [activeId]);
 
-  // Expand/collapse chapter
+  // ✅ Expand/collapse a chapter
   const toggleExpand = (num) => {
     setExpanded((prev) => {
       const newVal = prev === num ? null : num;
@@ -64,7 +70,7 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
     });
   };
 
-  // Build a verse lookup by chapter (if verses[] provided)
+  // ✅ Build a verse lookup by chapter (optional)
   const versesByChapter = verses.reduce((acc, v) => {
     const cnum = parseInt(v.chapter);
     if (!acc[cnum]) acc[cnum] = [];
@@ -81,7 +87,7 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
         }`}
       >
         <div className="p-4 h-full">
-          {/* Mobile header */}
+          {/* 🔹 Mobile Header */}
           <div className="flex items-center justify-between mb-4 sm:hidden">
             <h2 className="text-lg font-semibold text-gray-700">Chapters</h2>
             <button
@@ -92,18 +98,18 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
             </button>
           </div>
 
-          {/* Chapter list */}
+          {/* 🔹 Chapter list */}
           {chapters.length === 0 ? (
             <p className="text-sm text-gray-500">Loading chapters...</p>
           ) : (
             <ul className="space-y-2">
               {chapters.map((chapter, index) => {
-                const num = Number(chapter.number || chapter.id || index + 1);
+                const num = Number(chapter.id || index );
                 const isOpen = expanded === num;
                 const isActiveChapter =
-                  activeId && Number(activeId.split(".")[0]) === num;
+                  activeId === `chapter-${num}` ||
+                  (activeId && Number(activeId.split(".")[0]) === num);
 
-                // Get verse list for this chapter
                 const verseList =
                   versesByChapter[num] || chapter.verses || [];
 
@@ -121,14 +127,34 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                       <span>
                         {num}. {chapter.title || `Chapter ${num}`}
                       </span>
-                      {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                      {isOpen ? (
+                        <ChevronDown size={16} />
+                      ) : (
+                        <ChevronRight size={16} />
+                      )}
                     </button>
 
-                    {/* Verses under chapter */}
+                    {/* Verses list */}
                     {isOpen && (
                       <ul className="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-3">
+                        <li>
+                          <a
+                            href={`${basePath}/?chapter=${num}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              router.push(`/?chapter=${num}`);
+                              setOpen(false);
+                            }}
+                            className={`block p-1 text-sm transition ${
+                              activeId === `chapter-${num}`
+                                ? "bg-blue-100 text-blue-800 font-semibold"
+                                : "text-gray-700 hover:bg-gray-50"
+                            }`}
+                          >
+                            Overview
+                          </a>
+                        </li>
                         {verseList.map((v, i) => {
-                          // Handle both array-of-strings or objects
                           const vid =
                             typeof v === "string"
                               ? v
@@ -136,13 +162,16 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                           const isActiveVerse = activeId === vid;
 
                           return (
-                            <li key={vid || i} ref={isActiveVerse ? activeVerseRef : null}>
+                            <li
+                              key={vid || i}
+                              ref={isActiveVerse ? activeVerseRef : null}
+                            >
                               <a
                                 href={`${basePath}/verse/${vid}`}
                                 onClick={(e) => {
-                                  e.preventDefault();        // stop full page scroll
-                                  window.__skipSidebarScroll = true; // tell sidebar not to auto-scroll
-                                  router.push(`/verse/${vid}`);      // smooth route change
+                                  e.preventDefault();
+                                  window.__skipSidebarScroll = true;
+                                  router.push(`/verse/${vid}`);
                                   setOpen(false);
                                 }}
                                 className={`block p-1 text-sm transition ${
@@ -166,7 +195,7 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
+      {/* 🔹 Overlay for mobile */}
       {open && (
         <div
           className="fixed inset-0 bg-black bg-opacity-40 sm:hidden z-30"

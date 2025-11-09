@@ -14,7 +14,16 @@
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
+
+.chapter-card {
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 .sanskrit { font-size: 1.1rem; margin-bottom: 0.5rem; }
+
 blockquote {
   background: #f7efe2;
   padding: 0.7rem;
