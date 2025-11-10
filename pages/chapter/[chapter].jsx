@@ -65,8 +65,8 @@ export default function ChapterPage() {
           const next = chaptersData[chapterIndex + 1] || null;
           const prevId = getChapterId(prev);
           const nextId = getChapterId(next);
-          setPrevChapter(prevId && prevId > 0 ? prevId : null);
-          setNextChapter(nextId !== null ? nextId : null);
+          setPrevChapter(prevId && prevId > 0 ? { id: prevId, title: prev?.title ?? null } : null);
+          setNextChapter(nextId !== null ? { id: nextId, title: next?.title ?? null } : null);
         } else {
           setPrevChapter(null);
           setNextChapter(null);
@@ -125,6 +125,13 @@ export default function ChapterPage() {
             const hasNext = nextChapter !== null;
             if (!hasPrev && !hasNext) return null;
 
+            const makeLabel = (entry) => {
+              if (!entry) return "";
+              const num = entry.id;
+              const title = entry.title;
+              return `Chapter ${num}`;
+            };
+
             const containerClasses =
               hasPrev && hasNext ? "justify-between" : "justify-start";
 
@@ -132,27 +139,27 @@ export default function ChapterPage() {
               <div className={`flex gap-4 mt-6 ${containerClasses}`}>
                 {hasPrev && (
                   <Link
-                    href={`/chapter/${prevChapter}`}
+                    href={`/chapter/${prevChapter.id}`}
                     onClick={() => {
                       window.__skipSidebarScroll = true;
                       setSidebarOpen(false);
                     }}
                     className="inline-block px-4 py-2 rounded-md bg-amber-600 text-white hover:bg-amber-500 transition"
                   >
-                    ← Previous Chapter
+                    ← {makeLabel(prevChapter)}
                   </Link>
                 )}
 
                 {hasNext && (
                   <Link
-                    href={`/chapter/${nextChapter}`}
+                    href={`/chapter/${nextChapter.id}`}
                     onClick={() => {
                       window.__skipSidebarScroll = true;
                       setSidebarOpen(false);
                     }}
                     className="inline-block px-4 py-2 rounded-md bg-amber-600 text-white hover:bg-amber-500 transition"
                   >
-                    Next Chapter →
+                    {makeLabel(nextChapter)} →
                   </Link>
                 )}
               </div>
