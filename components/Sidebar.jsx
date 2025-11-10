@@ -114,6 +114,9 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
 
                 const verseList =
                   versesByChapter[num] || chapter.verses || [];
+                const chapterTitle = chapter.title || `Chapter ${num}`;
+                const chapterLabel =
+                  num === 0 ? chapterTitle : `${num}. ${chapterTitle}`;
 
                 return (
                   <li key={num}>
@@ -126,9 +129,7 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
                           : "text-gray-800 hover:bg-gray-100"
                       }`}
                     >
-                      <span>
-                        {num}. {chapter.title || `Chapter ${num}`}
-                      </span>
+                      <span>{chapterLabel}</span>
                       {isOpen ? (
                         <ChevronDown size={16} />
                       ) : (
