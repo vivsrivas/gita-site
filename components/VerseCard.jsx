@@ -1,5 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 export default function VerseCard({ verse, commentaries = [] }) {
   return (
@@ -47,7 +48,7 @@ export default function VerseCard({ verse, commentaries = [] }) {
 
                 {/* ✅ Updated Markdown rendering */}
                 <div className="prose prose-sm max-w-none text-gray-800">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
                     {c.commentary || ""}
                   </ReactMarkdown>
                 </div>
