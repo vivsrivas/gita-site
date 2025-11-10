@@ -6,7 +6,7 @@ export default function ChapterCard({ chapter, verses = [], commentaries = [] })
   if (!chapter) return null;
 
   return (
-    <div className="chapter-card max-w-3xl mx-auto">
+    <div className="chapter-card w-full">
       {/* 🔹 Chapter Heading */}
       <h2 className="text-2xl font-bold text-gray-900 mb-4">
         Chapter {chapter.id || chapter.number}:{" "}
