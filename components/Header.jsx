@@ -2,6 +2,8 @@ import { Menu, X } from "lucide-react";
 import SearchBox from "./SearchBox";
 
 export default function Header({ sidebarOpen, setSidebarOpen, onSearch }) {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
+
   // Ensure function safety
   const toggleSidebar = () => {
     if (typeof setSidebarOpen === "function") {
@@ -12,20 +14,31 @@ export default function Header({ sidebarOpen, setSidebarOpen, onSearch }) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-[64px] bg-white border-b border-gray-200 shadow-sm z-50 flex items-center px-4">
-      {/* 🔹 Hamburger for mobile */}
-      <button
-        onClick={toggleSidebar}
-        className="sm:hidden p-2 rounded-md hover:bg-gray-100 mr-2"
-        aria-label="Toggle sidebar"
-      >
-        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
+    <header className="fixed top-0 left-0 right-0 h-[64px] bg-white border-b border-gray-200 shadow-sm z-50 flex items-center justify-between px-4">
+      <div className="flex items-center gap-3">
+        {/* 🔹 Hamburger for mobile */}
+        <button
+          onClick={toggleSidebar}
+          className="sm:hidden p-2 rounded-md hover:bg-gray-100"
+          aria-label="Toggle sidebar"
+        >
+          {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
 
-      {/* 🔹 Title */}
-      <h1 className="text-xl font-bold tracking-wide text-[#c77d28] whitespace-nowrap">
-        Bhagavad Gita
-      </h1>
+        {/* 🔹 Title */}
+        <h1 className="text-xl font-bold tracking-wide text-[#c77d28] whitespace-nowrap">
+          Bhagavad Gita
+        </h1>
+      </div>
+
+      <nav className="hidden sm:flex items-center gap-6 text-sm font-medium text-gray-700">
+        <a
+          href={`${basePath}/about`}
+          className="hover:text-[#c77d28] transition-colors"
+        >
+          About
+        </a>
+      </nav>
     </header>
   );
 }
