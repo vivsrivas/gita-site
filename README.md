@@ -4,7 +4,7 @@ Run locally while developing
 
     npm run dev
 
+# Initial Setup
 
-git submodule update --init --recursive
-npm install
-npm run build
+    npm install
+    npm run build
