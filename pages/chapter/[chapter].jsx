@@ -50,16 +50,23 @@ export default function ChapterPage() {
         );
         setChapterInfo(ch);
 
+        const getChapterId = (item) => {
+          if (!item) return null;
+          const raw = item.id ?? item.number ?? null;
+          const num = Number(raw);
+          return Number.isFinite(num) ? num : null;
+        };
+
         const chapterIndex = chaptersData.findIndex(
           (c) => Number(c.id) === Number(chapter) || Number(c.number) === Number(chapter)
         );
         if (chapterIndex !== -1) {
-          const getChapterId = (item) =>
-            item && (item.id ?? item.number ?? null);
           const prev = chaptersData[chapterIndex - 1] || null;
           const next = chaptersData[chapterIndex + 1] || null;
-          setPrevChapter(prev ? getChapterId(prev) : null);
-          setNextChapter(next ? getChapterId(next) : null);
+          const prevId = getChapterId(prev);
+          const nextId = getChapterId(next);
+          setPrevChapter(prevId && prevId > 0 ? prevId : null);
+          setNextChapter(nextId !== null ? nextId : null);
         } else {
           setPrevChapter(null);
           setNextChapter(null);
@@ -113,36 +120,44 @@ export default function ChapterPage() {
             commentaries={commentaries}
           />
 
-          <div className="flex justify-between gap-4 mt-6">
-            <div>
-              {prevChapter && (
-                <Link
-                  href={`/chapter/${prevChapter}`}
-                  onClick={() => {
-                    window.__skipSidebarScroll = true;
-                    setSidebarOpen(false);
-                  }}
-                  className="inline-block px-4 py-2 rounded-md bg-amber-600 text-white hover:bg-amber-500 transition"
-                >
-                  ← Previous Chapter
-                </Link>
-              )}
-            </div>
-            <div className="ml-auto">
-              {nextChapter && (
-                <Link
-                  href={`/chapter/${nextChapter}`}
-                  onClick={() => {
-                    window.__skipSidebarScroll = true;
-                    setSidebarOpen(false);
-                  }}
-                  className="inline-block px-4 py-2 rounded-md bg-amber-600 text-white hover:bg-amber-500 transition"
-                >
-                  Next Chapter →
-                </Link>
-              )}
-            </div>
-          </div>
+          {(() => {
+            const hasPrev = prevChapter !== null;
+            const hasNext = nextChapter !== null;
+            if (!hasPrev && !hasNext) return null;
+
+            const containerClasses =
+              hasPrev && hasNext ? "justify-between" : "justify-start";
+
+            return (
+              <div className={`flex gap-4 mt-6 ${containerClasses}`}>
+                {hasPrev && (
+                  <Link
+                    href={`/chapter/${prevChapter}`}
+                    onClick={() => {
+                      window.__skipSidebarScroll = true;
+                      setSidebarOpen(false);
+                    }}
+                    className="inline-block px-4 py-2 rounded-md bg-amber-600 text-white hover:bg-amber-500 transition"
+                  >
+                    ← Previous Chapter
+                  </Link>
+                )}
+
+                {hasNext && (
+                  <Link
+                    href={`/chapter/${nextChapter}`}
+                    onClick={() => {
+                      window.__skipSidebarScroll = true;
+                      setSidebarOpen(false);
+                    }}
+                    className="inline-block px-4 py-2 rounded-md bg-amber-600 text-white hover:bg-amber-500 transition"
+                  >
+                    Next Chapter →
+                  </Link>
+                )}
+              </div>
+            );
+          })()}
 
           <a
             href={`${basePath}/`}
