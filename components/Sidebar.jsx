@@ -53,10 +53,7 @@ export default function Sidebar({ chapters = [], verses = [], open, setOpen }) {
       return;
     }
     if (activeVerseRef.current) {
-      activeVerseRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      
     }
   }, [activeId]);
 
