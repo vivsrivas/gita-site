@@ -118,6 +118,7 @@ export default function ChapterPage() {
               (v) => Number(v.chapter) === Number(chapter)
             )}
             commentaries={commentaries}
+            onNext={() => router.push(`/verse/${chapterInfo.id}.1`)} 
           />
 
           {(() => {

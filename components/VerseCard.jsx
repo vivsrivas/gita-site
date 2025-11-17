@@ -1,8 +1,13 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import { ChevronLeft, ChevronRight, SkipBack, SkipForward } from "lucide-react";
 
-export default function VerseCard({ verse, commentaries = [], onPrev, onNext }) {
+export default function VerseCard({ verse, commentaries = [], 
+  onPrev, 
+  onNext,
+  onPrevChapter,
+  onNextChapter }) {
   return (
     <div className="verse-card">
       {/* 🔹 Header Row: verse number + next button */}
@@ -10,21 +15,42 @@ export default function VerseCard({ verse, commentaries = [], onPrev, onNext }) 
         <h2 className="text-xl font-semibold text-gray-800">
           {verse.chapter}.{verse.verse_number}
         </h2>
-        <div className="flex gap-2">
+        {/* Right: Navigation buttons */}
+        <div className="flex items-center gap-2">
+          {onPrevChapter && (
+            <button
+              onClick={onPrevChapter}
+              className="w-9 h-9 flex items-center justify-center bg-gita-500 text-white rounded-full hover:bg-gita-500 transition"
+              title="Previous Chapter"
+            >
+              <SkipBack size={18} />
+            </button>
+          )}
           {onPrev && (
             <button
               onClick={onPrev}
-              className="w-9 h-9 flex items-center justify-center bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition"
+              className="w-9 h-9 flex items-center justify-center bg-gita-500 text-white rounded-full hover:bg-gita-500 transition"
+              title="Previous Verse"
             >
-              ←
+              <ChevronLeft size={18} />
             </button>
           )}
           {onNext && (
             <button
               onClick={onNext}
-              className="w-9 h-9 flex items-center justify-center bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition"
+              className="w-9 h-9 flex items-center justify-center bg-gita-500 text-white rounded-full hover:bg-gita-600 transition"
+              title="Next Verse"
             >
-              →
+              <ChevronRight size={18} />
+            </button>
+          )}
+          {onNextChapter && (
+            <button
+              onClick={onNextChapter}
+              className="w-9 h-9 flex items-center justify-center bg-gita-500 text-white rounded-full hover:bg-gita-600 transition"
+              title="Next Chapter"
+            >
+              <SkipForward size={18} />
             </button>
           )}
         </div>

@@ -158,8 +158,16 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
         <div ref={contentRef} className="content flex-1 overflow-y-auto px-4 py-6 scroll-smooth">
           <VerseCard verse={verse} commentaries={commentaries} 
           onPrev={prevId ? () => goToVerse(prevId) : undefined}
-          onNext={nextId ? () => goToVerse(nextId) : undefined}/>
-
+          onNext={nextId ? () => goToVerse(nextId) : undefined}
+          onPrevChapter={
+            verse.chapter > 1 ? () => router.push(`/chapter/${verse.chapter - 1}`) : undefined
+          }
+          onNextChapter={
+            verse.chapter < chapters.length
+              ? () => router.push(`/chapter/${verse.chapter + 1}`)
+              : undefined
+          }
+          />
           <div className="nav-buttons">
             {prevId && (
               <button

@@ -1,18 +1,32 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import { ChevronRight } from "lucide-react";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
-export default function ChapterCard({ chapter, verses = [], commentaries = [] }) {
+export default function ChapterCard({ chapter, verses = [], commentaries = [], onNext }) {
   if (!chapter) return null;
 
   return (
     <div className="chapter-card w-full">
-      {/* 🔹 Chapter Heading */}
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">
-        Chapter {chapter.id || chapter.number}:{" "}
-        <span className="text-[#c77d28]">{chapter.title}</span>
-      </h2>
+      {/* 🔹 Header Row */}
+      <div className="flex items-center justify-between mb-4">
+        {/* Left: Chapter number and title */}
+        <h2 className="text-xl font-semibold text-gray-800">
+          {chapter.id}. {chapter.title}
+        </h2>
+
+        {/* Right: Next button (→ to first verse) */}
+        {onNext && (
+          <button
+            onClick={onNext}
+            title="Go to First Verse"
+            className="w-9 h-9 flex items-center justify-center bg-gita-500 text-white rounded-full hover:bg-gita-600 transition"
+          >
+            <ChevronRight size={18} />
+          </button>
+        )}
+      </div>
 
       {/* 🔹 Sanskrit name or subtitle (if present) */}
       {chapter.subtitle && (
