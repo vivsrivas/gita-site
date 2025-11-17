@@ -2,13 +2,37 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 
-export default function VerseCard({ verse, commentaries = [] }) {
+export default function VerseCard({ verse, commentaries = [], onPrev, onNext }) {
   return (
     <div className="verse-card">
-      <h2>{verse.chapter}.{verse.verse_number}</h2>
+      {/* 🔹 Header Row: verse number + next button */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">
+          {verse.chapter}.{verse.verse_number}
+        </h2>
+        <div className="flex gap-2">
+          {onPrev && (
+            <button
+              onClick={onPrev}
+              className="w-9 h-9 flex items-center justify-center bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition"
+            >
+              ←
+            </button>
+          )}
+          {onNext && (
+            <button
+              onClick={onNext}
+              className="w-9 h-9 flex items-center justify-center bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition"
+            >
+              →
+            </button>
+          )}
+        </div>
+      </div>
       <p className="sanskrit mb-6 font-semibold whitespace-pre-line leading-relaxed">
         {verse.text_sanskrit
-          .split("।")
+          .replace(/<br\s*\/?>/gi, "\n") // turn HTML <br> into actual newlines
+          .split(/।|\n/) // split on danda OR newline
           .filter(Boolean)
           .map((part, idx) => (
             <span key={idx}>

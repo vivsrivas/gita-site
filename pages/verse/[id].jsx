@@ -156,7 +156,9 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
           open={sidebarOpen}
           setOpen={setSidebarOpen} />
         <div ref={contentRef} className="content flex-1 overflow-y-auto px-4 py-6 scroll-smooth">
-          <VerseCard verse={verse} commentaries={commentaries} />
+          <VerseCard verse={verse} commentaries={commentaries} 
+          onPrev={prevId ? () => goToVerse(prevId) : undefined}
+          onNext={nextId ? () => goToVerse(nextId) : undefined}/>
 
           <div className="nav-buttons">
             {prevId && (
