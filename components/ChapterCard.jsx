@@ -13,14 +13,14 @@ export default function ChapterCard({ chapter, verses = [], commentaries = [], o
       <div className="flex items-center justify-between mb-4">
         {/* Left: Chapter number and title */}
         <h2 className="text-xl font-semibold text-gray-800">
-          {chapter.id}. {chapter.title}
+          {chapter.id !== 0 && `${chapter.id}. `}{chapter.title}
         </h2>
 
         {/* Right: Next button (→ to first verse) */}
         {onNext && (
           <button
             onClick={onNext}
-            title="Go to First Verse"
+            title="Next"
             className="w-9 h-9 flex items-center justify-center bg-gita-500 text-white rounded-full hover:bg-gita-600 transition"
           >
             <ChevronRight size={18} />
@@ -64,11 +64,13 @@ export default function ChapterCard({ chapter, verses = [], commentaries = [], o
                   {c.commentary || ""}
                 </ReactMarkdown>
               </div>
-
+              <hr className="my-3" />
               {c.translation && (
-                <p className="mt-3 text-sm text-gray-700 italic">
-                  “{c.translation}”
-                </p>
+                <div className="mt-3 text-sm text-gray-700 prose prose-sm max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                    {c.translation}
+                  </ReactMarkdown>
+                </div>
               )}
             </blockquote>
           ))}

@@ -118,9 +118,14 @@ export default function ChapterPage() {
               (v) => Number(v.chapter) === Number(chapter)
             )}
             commentaries={commentaries}
-            onNext={() => router.push(`/verse/${chapterInfo.id}.1`)} 
+            onNext={() => {
+              if (chapterInfo.id === 0) {
+                router.push(`/chapter/1`)
+              } else {
+                router.push(`/verse/${chapterInfo.id}.1`)
+              }
+            }} 
           />
-
           {(() => {
             const hasPrev = prevChapter !== null;
             const hasNext = nextChapter !== null;
