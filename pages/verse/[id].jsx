@@ -63,6 +63,13 @@ export async function getStaticProps({ params }) {
 
     // 🔹 Verse
   const verse = await safeFetchJSON(`${base}/verses/${id}.json`, `Verse ${id}`);
+  const allVerses = await safeFetchJSON(`${base}/index.json`, "Index");
+  if (verse && Array.isArray(allVerses)) {
+    const match = allVerses.find((v) => `${v.chapter}.${v.verse}` === id);
+    if (match?.four_pada === true) {
+      verse.four_pada = true;
+    }
+  }
   // 🔹 Chapters (for sidebar)
   const chapters = await safeFetchJSON(`${base}/chapters.json`, "Chapters");
   // 🔹 Attempt to load multiple commentaries
@@ -91,14 +98,29 @@ export default function VersePage({ verse: initialVerse, chapters: initialChapte
   const [prevId, setPrevId] = useState(null);
   const [nextId, setNextId] = useState(null);
 
+  async function loadFourPadaFlag(vid) {
+    try {
+      const res = await fetch(`${base}/index.json`);
+      const index = await res.json();
+      const row = index.find((v) => `${v.chapter}.${v.verse}` === vid);
+      return row?.four_pada === true;
+    } catch {
+      return false;
+    }
+  }
+
   // 🔹 Load verse + navigation whenever id changes
   useEffect(() => {
     if (!id) return;
     
     // Load verse JSON
-    fetch(`${base}/verses/${id}.json`)
-      .then((res) => res.json())
-      .then((data) => setVerse(data))
+    Promise.all([
+      fetch(`${base}/verses/${id}.json`).then((res) => res.json()),
+      loadFourPadaFlag(id),
+    ])
+      .then(([data, fourPada]) => {
+        setVerse({ ...data, four_pada: fourPada });
+      })
       .catch((err) => console.error("Error loading verse:", err));
 
     // Load commentaries dynamically (if not preloaded)

@@ -3,6 +3,44 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { ChevronLeft, ChevronRight, SkipBack, SkipForward } from "lucide-react";
 
+function formatSanskritForDisplay(verse) {
+  const raw = (verse?.text_sanskrit || "").replace(/<br\s*\/?>(\s*)/gi, "\n").trim();
+  if (!raw) return "";
+
+  if (verse?.four_pada === true) {
+    const m = raw.match(/^(.*?)\s*।\s*(.*?)\s*॥\s*([^॥]+?)\s*॥\s*$/s);
+    if (m) {
+      const firstHalf = (m[1] || "").trim();
+      const secondHalf = (m[2] || "").trim();
+      const marker = (m[3] || "").trim();
+
+      const splitHalf = (half) => {
+        const words = half.split(/\s+/).filter(Boolean);
+        if (words.length < 2) return [half, ""];
+        const mid = Math.max(1, Math.min(words.length - 1, Math.round(words.length / 2)));
+        return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")];
+      };
+
+      const [p1, p2] = splitHalf(firstHalf);
+      const [p3, p4] = splitHalf(secondHalf);
+
+      return [
+        p1,
+        `    ${p2} ।`,
+        p3,
+        `    ${p4} ॥ ${marker} ॥`,
+      ].join("\n");
+    }
+  }
+
+  return raw
+    .replace(/॥/g, "॥\n")
+    .replace(/।/g, "।\n")
+    .replace(/[ \t]*\n[ \t]*/g, "\n")
+    .replace(/\n{2,}/g, "\n")
+    .trim();
+}
+
 export default function VerseCard({ verse, commentaries = [], 
   onPrev, 
   onNext,
@@ -56,16 +94,7 @@ export default function VerseCard({ verse, commentaries = [],
         </div>
       </div>
       <p className="sanskrit mb-6 font-semibold whitespace-pre-line leading-relaxed">
-        {verse.text_sanskrit
-          .replace(/<br\s*\/?>/gi, "\n") // turn HTML <br> into actual newlines
-          .split(/।|\n/) // split on danda OR newline
-          .filter(Boolean)
-          .map((part, idx) => (
-            <span key={idx}>
-              {part.trim()}।
-              <br />
-            </span>
-          ))}
+        {formatSanskritForDisplay(verse)}
       </p>
       <p className="mb-6">{verse.translation}</p>
 
