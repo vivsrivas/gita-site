@@ -44,7 +44,7 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /gita-site
           NEXT_PUBLIC_DATA_BASE: https://vivsrivas.github.io/gita-data
-          NEXT_PUBLIC_COMMENTARY_AUTHORS: MGB,MGT,raghevendra
+          NEXT_PUBLIC_COMMENTARY_AUTHORS: MGB,MGT,raghevendra,nyayadeepika
         run: npm run build
 
       - name: Upload artifact for GitHub Pages
