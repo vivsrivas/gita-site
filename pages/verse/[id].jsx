@@ -14,7 +14,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "gita-site";
 export const authors = (
   process.env.COMMENTARY_AUTHORS ||
   process.env.NEXT_PUBLIC_COMMENTARY_AUTHORS ||
-  ""
+  "MGB,MGT,raghevendra,nyayadeepika"
 )
   .split(",")
   .map((a) => a.trim())

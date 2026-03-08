@@ -82,7 +82,10 @@ export default function Home({ chapters: initialChapters = [], verses: initialVe
 
         // Load multiple commentaries (if configured)
         const authors =
-          (process.env.NEXT_PUBLIC_COMMENTARY_AUTHORS || "")
+          (
+            process.env.NEXT_PUBLIC_COMMENTARY_AUTHORS ||
+            "MGB,MGT,raghevendra,nyayadeepika"
+          )
             .split(",")
             .map((a) => a.trim())
             .filter(Boolean);
