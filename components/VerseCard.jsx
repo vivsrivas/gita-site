@@ -33,9 +33,10 @@ function formatSanskritForDisplay(verse) {
     }
   }
 
-  return raw
-    .replace(/॥/g, "॥\n")
+  const protectedDoubleDanda = raw.replace(/॥/g, "__DOUBLE_DANDA__");
+  return protectedDoubleDanda
     .replace(/।/g, "।\n")
+    .replace(/__DOUBLE_DANDA__/g, "॥")
     .replace(/[ \t]*\n[ \t]*/g, "\n")
     .replace(/\n{2,}/g, "\n")
     .trim();
