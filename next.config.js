@@ -14,8 +14,11 @@ const nextConfig = {
   output: "export",            // ✅ enables static export
   trailingSlash: true,         // ✅ required for GitHub Pages
   images: { unoptimized: true },
-  basePath: "/gita-site",
-  assetPrefix: "/gita-site",                 // ✅ prefix static assets correctly,
+  basePath,
+  assetPrefix,
+  env: {
+    NEXT_PUBLIC_BASE_PATH: basePath,
+  },
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   reactStrictMode: true,

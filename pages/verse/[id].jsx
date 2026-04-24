@@ -10,7 +10,7 @@ const base =
   process.env.NEXT_PUBLIC_DATA_BASE || 
   "https://vivsrivas.github.io/gita-data";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "gita-site";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 export const authors = (
   process.env.COMMENTARY_AUTHORS ||
   process.env.NEXT_PUBLIC_COMMENTARY_AUTHORS ||

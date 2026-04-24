@@ -3,7 +3,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { ChevronRight } from "lucide-react";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 export default function ChapterCard({ chapter, verses = [], commentaries = [], onNext }) {
   if (!chapter) return null;
 

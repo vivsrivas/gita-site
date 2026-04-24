@@ -2,6 +2,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { ChevronLeft, ChevronRight, SkipBack, SkipForward } from "lucide-react";
+import { formatIastForDisplay } from "../lib/itransToIast";
 
 function formatSanskritForDisplay(verse) {
   const raw = (verse?.text_sanskrit || "").replace(/<br\s*\/?>(\s*)/gi, "\n").trim();
@@ -47,6 +48,8 @@ export default function VerseCard({ verse, commentaries = [],
   onNext,
   onPrevChapter,
   onNextChapter }) {
+  const formattedIast = formatIastForDisplay(verse?.itrans);
+
   return (
     <div className="verse-card">
       {/* 🔹 Header Row: verse number + next button */}
@@ -97,6 +100,16 @@ export default function VerseCard({ verse, commentaries = [],
       <p className="sanskrit mb-6 font-semibold whitespace-pre-line leading-relaxed">
         {formatSanskritForDisplay(verse)}
       </p>
+      {formattedIast && (
+        <div className="mb-6">
+          <p className="mb-2 text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-amber-700">
+            IAST
+          </p>
+          <p className="text-base text-gray-600 whitespace-pre-line leading-relaxed italic">
+            {formattedIast}
+          </p>
+        </div>
+      )}
       <p className="mb-6">{verse.translation}</p>
 
       {verse.commentary && (

@@ -2,7 +2,7 @@ import { Menu, X } from "lucide-react";
 import SearchBox from "./SearchBox";
 
 export default function Header({ sidebarOpen, setSidebarOpen, onSearch }) {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "/gita-site";
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
   // Ensure function safety
   const toggleSidebar = () => {
